@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<flex-config xmlns="http://www.adobe.com/2006/flex-config">
+   <output>../../../../../../build/jquery.crossdomain.swf</output>
+   <target-player>9.0.124</target-player>
+   <compiler>
+      <accessible>false</accessible>
+      <actionscript-file-encoding>utf-8</actionscript-file-encoding>
+      <locale>
+          <locale-element>en_US</locale-element>
+      </locale>
+      <source-path>
+          <path-element>../../../../</path-element>
+      </source-path>
+      <show-actionscript-warnings>true</show-actionscript-warnings>
+      <optimize>true</optimize>
+      <show-binding-warnings>true</show-binding-warnings>
+      <show-unused-type-selector-warnings>true</show-unused-type-selector-warnings>
+      <strict>true</strict>
+      <debug>false</debug>
+   </compiler>
+   <use-network>true</use-network>
+   <metadata>
+      <title>jQuery CrossDomain Proxy</title>
+      <description></description>
+      <publisher>ngsdev.org</publisher>
+      <creator>Atsushi Nagase</creator>
+      <language>EN</language>
+   </metadata>
+</flex-config>
