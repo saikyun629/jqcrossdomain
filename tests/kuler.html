@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="Content-Script--Type" content="text/javascript" />
+	<meta http-equiv="Content-Style--Type" content="text/css" />
+	<title>jQuery CrossDomain Test</title>
+	<meta name="robots" content="noindex,nofollow" />
+	<meta http-equiv="pragma" content="no-cache" />
+	<meta name="author" content="http://ngsdev.org/" />
+	<style type="text/css">
+	/* <![CDATA[ */
+		html,body { background:#999; text-align:center; margin:1em; font-family:sans-serif; font-size:85%; margin:0; }
+		body { padding:2em; }
+		#demo { width:80%; margin:0 auto; background:#fff; color:#333; padding:2.5em 0; border:5px solid #333; }
+		#tag { width:70%; font-size:2em; font-family:serif; border:2px solid #333; background:#999; color:#fff; }
+		#submit { font-size:2em; }
+	/* ]]> */
+	</style>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.1/jquery.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/swfobject/2.1/swfobject.js"></script>
+	<script src="jquery.color.js"></script>
+	<script src="../build/jquery.crossdomain.js?swf=../build/jquery.crossdomain.swf"></script>
+	<script type="text/javascript">
+	/* <![CDATA[ */
+		var apiloc = "http://kuler-api.adobe.com/rss/search.cfm";
+		var reqData = {
+			"listType":"random",
+			"startIndex":"1",
+			"itemsPerPage":"1",
+			"timeSpan":"6000",
+			"key":"02B22870C7D027FC33E7497791EB9904"
+		}
+		var speed = 1000;
+		function connectKuler(e) {
+			var tag = $("#tag").val();
+			var data = jQuery.extend(true,reqData,{"searchQuery":"tag:"+tag});
+			$.ajax({
+				"type":"GET",
+				"dataType":"xml",
+				"url":apiloc+"?"+$.param(data),
+				"success":function(d,st) {
+					var authorName = d.find("kuler\\:authorlabel").text();
+					var swatches = d.find("kuler\\:swatchHexColor");
+					var colors = [];
+					swatches.each(function(){
+						colors.push("#"+$(this).text());
+					});
+					$("body,html").animate({ backgroundColor:colors[0] },speed);
+					$("#demo").animate({
+						backgroundColor:colors[4],
+						borderTopColor:colors[2],
+						borderBottomColor:colors[2],
+						borderLeftColor:colors[2],
+						borderRightColor:colors[2]
+					},speed);
+					$("#tag").animate({
+						backgroundColor:colors[3],
+						borderTopColor:colors[1],
+						borderBottomColor:colors[1],
+						borderLeftColor:colors[1],
+						borderRightColor:colors[1]
+					});
+				}
+			})
+		}
+	/* ]]> */
+	</script>
+</head>
+<body>
+<div id="wrapper">
+	<div id="demo">
+		<form id="demo-form" onsubmit="connectKuler(event);return false;">
+			<input type="text" id="tag" />
+			<input type="submit" value="GetColor" id="submit" />
+		</form>
+	</div>
+</div>
+</body>
+
