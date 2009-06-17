@@ -35,7 +35,7 @@
 		var speed = 1000;
 		function connectKuler(e) {
 			var tag = $("#tag").val();
-			var data = jQuery.extend(true,reqData,{"searchQuery":"tag:"+tag});
+			var data = $.extend(true,{"searchQuery":"tag:"+tag},reqData);
 			$.ajax({
 				"type":"GET",
 				"dataType":"xml",
@@ -62,6 +62,9 @@
 						borderLeftColor:colors[1],
 						borderRightColor:colors[1]
 					});
+				},
+				error : function(xhr,status,e) {
+					alert(status);
 				}
 			})
 		}

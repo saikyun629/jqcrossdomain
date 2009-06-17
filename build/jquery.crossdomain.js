@@ -71,7 +71,8 @@ function onLoaderCallback(s,id,status,data) {
 			}
 			break;
 		case "xml":
-			data = $($(data)[1]);
+			data = data.replace(/<\?xml((?!\?>).)*\?>\n?/,"");
+			data = $(data);
 			break;
 		default:
 			data = String(data);
@@ -112,9 +113,7 @@ function ajax(s) {
 	window[CALLBACK_ID_PREFIX+r] = function(status,data) {
 		onLoaderCallback(s,r,status,data);
 	}
-	trace(s);
 	swfObj = $("#"+swfId)[0];
-	trace(swfObj.bindCallback);
 	try {
 		swfObj.bindCallback("window."+CALLBACK_ID_PREFIX+r,s);
 	} catch(e) { trace(e); }
