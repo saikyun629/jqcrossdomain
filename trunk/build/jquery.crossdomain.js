@@ -5,6 +5,7 @@
 ;(function($){
 /* @constants */
 var FILENAME = "jquery.crossdomain.js",
+	//
 	DS="\/", QS="?", AMP="&",
 	JS_EXT="\.js", SWF_EXT="\.swf",
 	DIV_ID_PREFIX = "jqcrossdomain-",
@@ -13,18 +14,21 @@ var FILENAME = "jquery.crossdomain.js",
 	REQUIRED_VERSION = "9.0",
 	ERROR_NOT_INITIALIZED = "jquery.crossdomain is not initialized!",
 	EXTERNAL_SRC_REGEXP = /^https?:\/\/.*/,
-	JSONP_REGEXP = /=\?(&|$)/g;
+	JSONP_REGEXP = /=\?(&|$)/g,
+	STATUS_SUCCESS = "success",
+	STATUS_PARSE_ERROR = "parseerror",
+	STATUS_NOT_MODIFIED = "notmodified",
+	STATUS_TIMEOUT = "timeout",
+	STATUS_ERROR = "error",
+	EVENT_AJAX_SUCCESS = "ajaxSucces",
+	EVENT_AJAX_COMPLETE = "ajaxComplete",
+	EVENT_AJAX_ERROR = "ajaxError";
 
 /** @private */
 var ajaxOrg = $.ajax,
-	swfPath,
-	loadParam,
-	divId,
-	swfId,
-	rnd,
-	policyFile,
+	swfPath, swfObj, loadParam,
+	divId, swfId, rnd, policyFile,
 	initialized=false,
-	swfObj,
 	cache = {};
 
 function getScriptTag() {
@@ -46,28 +50,48 @@ function getScriptTag() {
 }
 
 function onLoaderCallback(s,id,status,data) {
-	switch(s.type) {
+	var type = (s.type||"").match(/^GET$|^POST$/) ? (s.dataType||"text"):s.type;
+	var st;
+	switch(status) {
+		case 200:
+			st = STATUS_SUCCESS;
+			break;
+		case 304:
+			st = STATUS_NOT_MODIFIED;
+			break;
+		default:
+			return handleError(s,id,STATUS_ERROR);
+	}
+	switch(type) {
 		case "json":
 			try {
 				data = eval("("+data+")");
 			} catch(e) {
-				return onLoaderError(s,id,status);
+				return handleError(s,id,STATUS_PARSE_ERROR);
 			}
 			break;
 		case "xml":
-			data = $(data);
+			data = $($(data)[1]);
 			break;
 		default:
 			data = String(data);
 			break;
 	}
-	if(s.success) s.success(data,status);
-	if(s.global) $.evant.trigger("ajaxSucces",[null,s]);
+	var xhr = null;
+	var st = status == 304 ? STATUS_NOT_MODIFIED : STATUS_SUCCESS;
+	if(s.success) s.success(data,st);
+	if(s.complete) s.complete(data,st);
+	if(s.global){
+		$.event.trigger(EVENT_AJAX_SUCCESS,[xhr,s]);
+		$.event.trigger(EVENT_AJAX_COMPLETE,[xhr,s]);
+	}
 	deleteCallback(id);
 }
 
-function onLoaderError(s,id,status) {
-	
+function handleError(s,id,status,e) {
+	var xhr = null;
+	if(s.error) s.error(xhr,status,e);
+	if(s.global) $.event.trigger(EVENT_AJAX_ERROR,[xhr,s,e]);
 	deleteCallback(id);
 }
 
@@ -92,12 +116,12 @@ function ajax(s) {
 	swfObj = $("#"+swfId)[0];
 	trace(swfObj.bindCallback);
 	try {
-		swfObj.bindCallback("window."+CALLBACK_ID_PREFIX+r,s.url,s.policyFile||"");
+		swfObj.bindCallback("window."+CALLBACK_ID_PREFIX+r,s);
 	} catch(e) { trace(e); }
 }
 
 function getRandom() {
-	return String(~~(Math.random()*100000000));
+	return String(Math.abs(~~(Math.random()*new Date().getTime())));
 }
 
 function trace(a) {
