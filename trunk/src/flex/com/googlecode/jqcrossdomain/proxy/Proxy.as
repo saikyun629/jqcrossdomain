@@ -18,6 +18,8 @@ package com.googlecode.jqcrossdomain.proxy {
 		}
 		private function init(e:Event):void {
 			ExternalInterface.addCallback(BIND_FUNCTION_NAME,bindCallback);
+			var rf:String = loaderInfo.parameters.readyFuncName;
+			if(rf) ExternalInterface.call(rf);
 			removeEventListener(Event.ADDED_TO_STAGE,init);
 		}
 		private function bindCallback(funcname:String,s:Object):void {

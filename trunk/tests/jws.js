@@ -100,7 +100,7 @@ $(function(){
 	function getResults(key,value) {
 		$.ajax({
 			type:"xml",
-			url:API_HOTELS+"?pict_size=2&key="+apiKey+"&"+key+"="+value,
+			url:API_HOTELS+"?pict_size=1&key="+apiKey+"&"+key+"="+value,
 			policyFile:"http://jws.jalan.net/crossdomain.xml",
 			success:onLoadResults
 		});
@@ -120,11 +120,11 @@ $(function(){
 		var pict = $("PictureURL",d).text()||"";
 		return [
 			"<li>",
-				"<p class=\"pict\"><img src=\"",pict,"\" \/><\/p>",
+				"<p class=\"pict\"><a href=\"",url,"\" style=\"background-image:url('"+pict+"');\">&nbsp;<\/a><\/p>",
 				"<h3><a href=\"",url,"\">",name,"<\/a><\/h3>",
 				"<p class=\"copy\">",copy,"<\/p>",
 			"<\/li>"
 		].join("");
 	}
-	setTimeout(init,1000)
+	$(document).proxyReady(init);
 });
