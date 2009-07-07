@@ -22,7 +22,8 @@ var FILENAME = "jquery.crossdomain.js",
 	STATUS_ERROR = "error",
 	EVENT_AJAX_SUCCESS = "ajaxSucces",
 	EVENT_AJAX_COMPLETE = "ajaxComplete",
-	EVENT_AJAX_ERROR = "ajaxError";
+	EVENT_AJAX_ERROR = "ajaxError",
+	READY_FUNCNAME_PREFIX = "onProxyReady_";
 
 /** @private */
 var ajaxOrg = $.ajax,
@@ -142,8 +143,12 @@ function init() {
 	].join(""));
 	var fvars = {
 		rnd:rnd,
-		host:document.location.protocol+DS+DS+document.location.host
+		host:document.location.protocol+DS+DS+document.location.host,
+		readyFuncName : READY_FUNCNAME_PREFIX+rnd
 	};
+	window[READY_FUNCNAME_PREFIX+rnd] = function(){
+		$.proxyReady();
+	}
 	var fprm = {};
 	var fatr = {
 		"allowScriptAccess":"always"
@@ -151,6 +156,35 @@ function init() {
 	swfobject.embedSWF(swfPath,swfId,1,1,REQUIRED_VERSION,null,fvars,fprm,fatr);
 	initialized = true;
 }
+
+$.extend({
+	proxyReadyList : [],
+	isProxyReady: false,
+	proxyReady : function() {
+		if(!$.isProxyReady) {
+			$.isProxyReady = true;
+			if ($.proxyReadyList) {
+				var fn,i=0;
+				while ((fn=$.proxyReadyList[i++])) {
+					fn.call(document,$);
+				}
+				$.proxyReadyList = null;
+			}
+			$(document).triggerHandler("proxyReady");
+		}
+	}
+});
+
+$.fn.extend({
+	proxyReady : function(fn) {
+		if($.isProxyReady) {
+			fn.call( document,$);
+		} else {
+			$.proxyReadyList.push(fn);
+		}
+		return this;
+	}
+});
 
 getScriptTag();
 $.ajax = ajax;
